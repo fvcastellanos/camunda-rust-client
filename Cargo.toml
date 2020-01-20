@@ -1,0 +1,13 @@
+[package]
+name = "external-client-rust"
+version = "0.1.0"
+authors = ["Francisco Castellanos"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#curl = "0.4.25"
+#reqwest = "0.10.1"
+
+reqwest = { version = "0.10", features = ["blocking", "json"] }
