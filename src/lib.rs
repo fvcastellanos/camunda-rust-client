@@ -3,7 +3,7 @@ extern crate reqwest;
 extern crate serde;
 
 use std::collections::HashMap;
-//use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 
 const ENGINE : &str = "/engine";
 const PROCESS_DEFINITION : &str = "/process-definition";
@@ -14,25 +14,28 @@ pub struct WorkflowEngine {
     base_url : String,
 }
 
-/*
 #[derive(Deserialize)]
 pub struct ProcessDefinition {
-    id: String,
-    key: String,
-    category: String,
-    description: String,
-    name: String,
+    id: Option<String>,
+    key: Option<String>,
+    category: Option<String>,
+    description: Option<String>,
+    name: Option<String>,
     version: u16,
-    resource: String,
-    deployment_id: String,
-    diagram: String,
+    resource: Option<String>,
+    #[serde(rename="deploymentId")]
+    deployment_id: Option<String>,
+    diagram: Option<String>,
     suspended: bool,
-    tenant_id: String,
-    version_tag: String,
-    history_time_to_live: String,
-    startable_in_task_list: bool
+    #[serde(rename="tenantId")]
+    tenant_id: Option<String>,
+    #[serde(rename="versionTag")]
+    version_tag: Option<String>,
+    #[serde(rename="historyTimeToLive")]
+    history_time_to_live: Option<String>,
+    #[serde(rename="startableInTasklist")]
+    startable_in_tasklist: bool
 }
-*/
 
 impl WorkflowEngine {
 
@@ -66,7 +69,7 @@ impl WorkflowEngine {
         Err(error_message)
     }
 
-    pub fn get_process_definitions(&self) -> Result<Vec<HashMap<String, String>>, String> {
+    pub fn get_process_definitions(&self) -> Result<Vec<ProcessDefinition>, String> {
 
         let resource_url = self.build_resource_uri(PROCESS_DEFINITION);
 
@@ -81,16 +84,13 @@ impl WorkflowEngine {
 
         if response.status().is_success() {
 
-            let process_definition_list = response.json::<Vec<HashMap<String, String>>>();
-
-            return process_definition_list
-                .map_err(| err | err.to_string());
+            self.deserialize_json(response);
         }
 
         let error_message = format!("[http error code: {}]", response.status().to_string());
         Err(error_message)
     }
-    
+
     // ------------------------------------------------------------------
 
     fn build_resource_uri(&self, resource: &str) -> String {
@@ -99,6 +99,14 @@ impl WorkflowEngine {
         let engine_context = resource.to_string();
         
         return base_url + &engine_context;
+    }
+
+    fn deserialize_json<T>(&self, response : reqwest::blocking::Response) -> Result<T, String> {
+
+        let result = response.json::<T>();
+
+        return result
+            .map_err(| err | err.to_string());
     }
 }
 
@@ -154,14 +162,10 @@ mod tests {
     #[test]
     fn get_process_definitions_test() {
 
-        let engine : WorkflowEngine = WorkflowEngine::from_url("http://localhost:8080/rest");
+        let engine : WorkflowEngine = WorkflowEngine::from_url("http://192.168.0.107:8080/rest/engine/regularWorkflow");
 
         let result = engine.get_process_definitions();
 		
-        assert!(result.is_err());
-
-		let blah = result.unwrap();
-
-
+        assert!(result.is_ok());
     }
 }
