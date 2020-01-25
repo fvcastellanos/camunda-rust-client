@@ -3,7 +3,7 @@ extern crate reqwest;
 extern crate serde;
 
 use std::collections::HashMap;
-use serde::{Serialize, Deserialize};
+use serde::{ Deserialize };
 
 const ENGINE : &str = "/engine";
 const PROCESS_DEFINITION : &str = "/process-definition";
@@ -60,9 +60,7 @@ impl WorkflowEngine {
 
         if response.status().is_success() {
     
-            let engine_list = response.json::<Vec<HashMap<String, String>>>();
-
-            return engine_list.map_err(| err | err.to_string());
+            return self.deserialize_response::<Vec<HashMap<String, String>>>(response);
         }
     
         let error_message = format!("[http error code: {}]", response.status().to_string());
@@ -82,12 +80,14 @@ impl WorkflowEngine {
 
         let response = response_result.unwrap();
 
-        if response.status().is_success() {
+        let response_status = response.status();
 
-            self.deserialize_json(response);
+        if response_status.is_success() {
+
+            return self.deserialize_response::<Vec<ProcessDefinition>>(response);
         }
 
-        let error_message = format!("[http error code: {}]", response.status().to_string());
+        let error_message = format!("[http error code: {}]", response_status.to_string());
         Err(error_message)
     }
 
@@ -101,12 +101,12 @@ impl WorkflowEngine {
         return base_url + &engine_context;
     }
 
-    fn deserialize_json<T>(&self, response : reqwest::blocking::Response) -> Result<T, String> {
+    fn deserialize_response<T: serde::de::DeserializeOwned>(&self, response : reqwest::blocking::Response) -> Result<T, String> {
 
         let result = response.json::<T>();
 
         return result
-            .map_err(| err | err.to_string());
+            .map_err(| err | err.to_string());    
     }
 }
 
@@ -162,7 +162,7 @@ mod tests {
     #[test]
     fn get_process_definitions_test() {
 
-        let engine : WorkflowEngine = WorkflowEngine::from_url("http://192.168.0.107:8080/rest/engine/regularWorkflow");
+        let engine : WorkflowEngine = WorkflowEngine::from_url("http://localhost:8080/rest/engine/default");
 
         let result = engine.get_process_definitions();
 		
