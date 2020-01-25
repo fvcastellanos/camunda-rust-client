@@ -117,11 +117,11 @@ mod tests {
 
     extern crate httpmock;
 
-    use std::fs;
-
     use httpmock::Method::GET;
     use httpmock::{mock, with_mock_server};
 
+    use std::fs;
+    
     use super::*;
 
     const TEST_ENGINE_URL : &str = "http://localhost:5000/rest";
