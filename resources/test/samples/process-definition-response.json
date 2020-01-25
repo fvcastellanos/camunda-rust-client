@@ -1,0 +1,18 @@
+[
+    {
+      "id": "helloWorldProcess:10:fb7969ce-3818-11ea-a51f-dead6e9bf90a",
+      "key": "helloWorldProcess",
+      "category": "http://bpmn.io/schema/bpmn",
+      "description": null,
+      "name": "Hello World Process",
+      "version": 10,
+      "resource": "HelloWorldProcess.bpmn",
+      "deploymentId": "fb45fdbc-3818-11ea-a51f-dead6e9bf90a",
+      "diagram": null,
+      "suspended": false,
+      "tenantId": null,
+      "versionTag": null,
+      "historyTimeToLive": null,
+      "startableInTasklist": true
+    }
+]

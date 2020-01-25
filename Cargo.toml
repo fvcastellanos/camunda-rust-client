@@ -12,3 +12,4 @@ serde = "1.0.104"
 
 [dev-dependencies]
 httpmock = "0.3.3"
+galvanic-assert = "0.8.7"

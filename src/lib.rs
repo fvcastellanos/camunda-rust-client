@@ -117,6 +117,8 @@ mod tests {
 
     extern crate httpmock;
 
+    use std::fs;
+
     use httpmock::Method::GET;
     use httpmock::{mock, with_mock_server};
 
@@ -160,12 +162,33 @@ mod tests {
     }
 
     #[test]
+    #[with_mock_server]
     fn get_process_definitions_test() {
 
-        let engine : WorkflowEngine = WorkflowEngine::from_url("http://localhost:8080/rest/engine/default");
+        let process_definitions = read_sample("process-definition-response.json");
+
+        let engine_mock = mock(GET, "/rest/process-definition")
+            .return_status(200)
+            .return_header("ContentType", "application/json")
+            .return_body(process_definitions.as_str())
+            .create();
+
+        let engine : WorkflowEngine = WorkflowEngine::from_url(TEST_ENGINE_URL);
 
         let result = engine.get_process_definitions();
 		
         assert!(result.is_ok());
+        assert_eq!(engine_mock.times_called(), 1);
+    }
+
+    // Fixtures
+    // -----------------------------------------------------------------------------
+
+    fn read_sample(sample_name: &str) -> String {
+        
+        let resource_dir = format!("resources/test/samples/{}", sample_name);
+
+        return fs::read_to_string(&resource_dir)
+            .expect(&resource_dir.as_str());
     }
 }
